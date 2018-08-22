@@ -3,14 +3,11 @@ package app;
 import app.pagesLogic.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -22,7 +19,10 @@ public class MainController {
         System.out.println(name);
         return "index";
     }*/
-    @Autowired AnnotationConfigWebApplicationContext context;
+    @Autowired
+    AnnotationConfigWebApplicationContext context;
+
+    //TODO привязать через Autowired и Qualifier реализации созданного абстрактного класса для каждого представления свою.
 
     @RequestMapping(path = "/*")
     public String getHome() {
@@ -41,11 +41,16 @@ public class MainController {
 
     @RequestMapping(path = "/answer")
     public ModelAndView getAnswer(
-            @RequestParam(value = "a", required = false) String a,
-            @RequestParam(value = "b", required = false) String b,
-            @RequestParam(value = "operation", required = false) String operation,
+            @RequestParam(value = "a") String a,
+            @RequestParam(value = "b") String b,
+            @RequestParam(value = "operation") String operation,
             HttpSession session) {
+        //TODO убрать получение экземпляра напрямую из контекста.
         Answer answer = context.getBean(Answer.class);
+        return createModelAndView(answer, session, a, b, operation);
+    }
+
+    private ModelAndView createModelAndView(Answer answer, HttpSession session, @RequestParam(value = "a") String a, @RequestParam(value = "b") String b, @RequestParam(value = "operation") String operation) {
         try {
             return answer.build(session, a, b, operation);
         } catch (Exception e) {

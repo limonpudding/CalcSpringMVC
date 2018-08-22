@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Service
+//TODO создать абстрактный класс, наследовать от него.
 public class Answer {
     public ModelAndView build(HttpSession session, String a, String b, String operation) throws Exception {
         String ans = calc(a, b, operation);
