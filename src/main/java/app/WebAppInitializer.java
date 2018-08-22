@@ -22,6 +22,8 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
 
         // Manage the lifecycle of the root application context
         container.addListener(org.apache.tiles.extras.complete.CompleteAutoloadTilesListener.class);
+
+        container.setInitParameter("DBName", "jdbc/db");
         // Create the dispatcher servlet's Spring application context
         AnnotationConfigWebApplicationContext dispatcherContext =
                 new AnnotationConfigWebApplicationContext();
