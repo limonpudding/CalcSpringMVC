@@ -1,7 +1,13 @@
 package app.pagesLogic;
 
+import app.math.Fibonacci;
+import app.math.LongArithmethic;
+import app.math.LongArithmeticImplList;
+import app.math.LongArithmeticMath;
 import org.hibernate.Session;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,40 +21,28 @@ import java.util.UUID;
 
 @Service
 public class Answer {
-    HttpSession session;
-
-    Answer()
-
-    public static void build() throws Exception {
-
-
-        HttpSession session = page.getValue().getRequest().getSession();
-
-        String a = page.getValue().getRequest().getParameter("a");
-        String b = page.getValue().getRequest().getParameter("b");
-        String operation = page.getValue().getRequest().getParameter("operation");
+    public ModelAndView build(HttpSession session, String a, String b, String operation) throws Exception {
         String ans = calc(a, b, operation);
 
         OperationsHistory operationsHistory = new OperationsHistory();
         operationsHistory.getHistory(session);
 
-        org.Operation oper = new org.Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
-
-        putDataInBD(oper, page.getValue().getRequest());
+        Operation oper = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
 
         operationsHistory.addOperation(oper);
 
-        session.getServletContext().setAttribute(session.getId(), operationsHistory.getHistory());
-
-        page.getValue().getRequest().setAttribute("operationsHistory", operationsHistory.getHistory());
-        page.getValue().getRequest().setAttribute("answer", ans);
-        page.getValue().getRequest().getRequestDispatcher("answer.jsp").forward(page.getValue().getRequest(), page.getValue().getResponse());
+        session.setAttribute(session.getId(), operationsHistory.getHistory());
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("answer");
+        mav.addObject("operationsHistory", operationsHistory.getHistory());
+        mav.addObject("answer", ans);
+        return mav;
     }
 
     public static String calc(String strA, String strB, String operation) throws IOException {
         LongArithmethic res;
-        LongArithmethic a = injector.getValue().getInstance(LongArithmethic.class);
-        LongArithmethic b = injector.getValue().getInstance(LongArithmethic.class);
+        LongArithmethic a = new LongArithmeticImplList();
+        LongArithmethic b = new LongArithmeticImplList();
         a.setValue(strA);
         b.setValue(strB);
         switch (operation) {
@@ -73,30 +67,30 @@ public class Answer {
         return res.toString();
     }
 
-    private void putDataInBD(Operation operation, HttpServletRequest req) {
-        try (Connection connection = dataBase.getValue().getConnection()) {
-            switch (operation.operation) {
-                case "fib":
-                    PreparedStatement fibonacci = connection.prepareStatement("insert into " + operation.operation + " (ID, FIRSTOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?)");
-                    fibonacci.setString(1, operation.idOperation);
-                    fibonacci.setString(2, operation.a);
-                    fibonacci.setString(3, operation.result);
-                    fibonacci.setString(4, req.getSession().getId());
-                    fibonacci.setTimestamp(5, new Timestamp(operation.date.getTime()));
-                    fibonacci.executeUpdate();
-                    break;
-                default:
-                    PreparedStatement arithmetic = connection.prepareStatement("insert into " + operation.operation + " (ID, FIRSTOPERAND, SECONDOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?,?)");
-                    arithmetic.setString(1, operation.idOperation);
-                    arithmetic.setString(2, operation.a);
-                    arithmetic.setString(3, operation.b);
-                    arithmetic.setString(4, operation.result);
-                    arithmetic.setString(5, req.getSession().getId());
-                    arithmetic.setTimestamp(6, new Timestamp(operation.date.getTime()));
-                    arithmetic.executeUpdate();
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
+//    private void putDataInBD(Operation operation, HttpServletRequest req) {
+//        try (Connection connection = dataBase.getValue().getConnection()) {
+//            switch (operation.operation) {
+//                case "fib":
+//                    PreparedStatement fibonacci = connection.prepareStatement("insert into " + operation.operation + " (ID, FIRSTOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?)");
+//                    fibonacci.setString(1, operation.idOperation);
+//                    fibonacci.setString(2, operation.a);
+//                    fibonacci.setString(3, operation.result);
+//                    fibonacci.setString(4, req.getSession().getId());
+//                    fibonacci.setTimestamp(5, new Timestamp(operation.date.getTime()));
+//                    fibonacci.executeUpdate();
+//                    break;
+//                default:
+//                    PreparedStatement arithmetic = connection.prepareStatement("insert into " + operation.operation + " (ID, FIRSTOPERAND, SECONDOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?,?)");
+//                    arithmetic.setString(1, operation.idOperation);
+//                    arithmetic.setString(2, operation.a);
+//                    arithmetic.setString(3, operation.b);
+//                    arithmetic.setString(4, operation.result);
+//                    arithmetic.setString(5, req.getSession().getId());
+//                    arithmetic.setTimestamp(6, new Timestamp(operation.date.getTime()));
+//                    arithmetic.executeUpdate();
+//            }
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//        }
+//    }
 }

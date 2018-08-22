@@ -1,25 +1,16 @@
 package app.pagesLogic;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 class Operation {
-    @JsonProperty("a")
     String a;
-    @JsonProperty("b")
     String b;
-    @JsonProperty("operation")
     String operation;
-    @JsonProperty("result")
     String result;
-    @JsonIgnore
     Date date;
-    @JsonIgnore
     String idOperation;
-    @JsonIgnore
     SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 
     Operation(){

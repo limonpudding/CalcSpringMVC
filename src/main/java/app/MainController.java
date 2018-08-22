@@ -1,12 +1,14 @@
 package app;
 
+import app.pagesLogic.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -20,6 +22,7 @@ public class MainController {
         System.out.println(name);
         return "index";
     }*/
+    @Autowired AnnotationConfigWebApplicationContext context;
 
     @RequestMapping(path = "/*")
     public String getHome() {
@@ -41,9 +44,14 @@ public class MainController {
             @RequestParam(value = "a", required = false) String a,
             @RequestParam(value = "b", required = false) String b,
             @RequestParam(value = "operation", required = false) String operation,
-            HttpSession session,
-            Model model, AnnotationConfigWebApplicationContext context) {
-        return (ModelAndView)context.getBean("getAnswer");
+            HttpSession session) {
+        Answer answer = context.getBean(Answer.class);
+        try {
+            return answer.build(session, a, b, operation);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 
     @RequestMapping(path = "/about")
