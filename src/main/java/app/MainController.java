@@ -1,8 +1,8 @@
 package app;
 
-import app.pagesLogic.Answer;
 import app.pagesLogic.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,18 +28,21 @@ public class MainController {
     //TODO привязать через Autowired и Qualifier реализации созданного абстрактного класса для каждого представления свою.
 
     @RequestMapping(path = "/")
-    public String getHome() {
-        return "home";
+    public ModelAndView getHome() throws Exception {
+        Page page = context.getBean(Page.class,"getHome");
+        return page.build();
     }
 
     @RequestMapping(path = "/calc")
-    public String getCalc() {
-        return "input";
+    public ModelAndView getCalc() throws Exception {
+        Page page = context.getBean(Page.class,"getCalc");
+        return page.build();
     }
 
     @RequestMapping(path = "/ophistory")
-    public String getOperationHistory() {
-        return "ophistory";
+    public ModelAndView getOperationHistory() throws Exception {
+        Page page = context.getBean(Page.class,"getOpHistory");
+        return page.build();
     }
 
     @RequestMapping(path = "/answer")
@@ -60,8 +63,14 @@ public class MainController {
     }
 
     @RequestMapping(path = "/about")
-    public String getAbout() {
-        return "about";
+    public ModelAndView getAbout() throws Exception {
+        Page page = context.getBean(Page.class,"getAbout");
+        return page.build();
     }
 
+    @RequestMapping(path = "/*")
+    public ModelAndView getError() throws Exception {
+        Page page = context.getBean(Page.class,"getError");
+        return page.build();
+    }
 }
