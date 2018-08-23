@@ -82,14 +82,49 @@ public class JDBC {
     }
 
     public List<SessionsRow> selectSessionsFromBD(String mode, String order) {
-        try (Connection connection = dataSource.getConnection()) {
-            Statement statement = connection.createStatement();
-            ResultSet rs = getResultSessionsSet(mode, order, statement);
-            return createSessionsList(rs);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        String orderStr;
+        String modeStr;
+        if ("desc".equals(order)) {
+            orderStr = "desc";
+        } else {
+            orderStr = "asc";
         }
-        return null;
+        if (mode == null)
+            mode = "";
+        switch (mode) {
+            case "idSession":
+                modeStr = "ID";
+                break;
+            case "ip":
+                modeStr = "IP";
+                break;
+            case "timeStart":
+                modeStr = "TIMESTART";
+                break;
+            case "timeEnd":
+                modeStr = "TIMEEND";
+                break;
+            default:
+                modeStr = "ID";
+        }
+
+
+
+            final String SELECT_SQL = "" +
+                    "select * from (select distinct sessions.id, sessions.ip,sessions.timestart,sessions.timeend, 'false' as operation from SESSIONS left join history on SESSIONS.id = HISTORY.id where operation is null\n" +
+                    "union all\n" +
+                    "select distinct sessions.id, sessions.ip,sessions.timestart,sessions.timeend, 'true' as operation from SESSIONS left join history on SESSIONS.id = HISTORY.id where operation is not null) order by " + modeStr + " " + orderStr;
+            List<SessionsRow> dbRows = jdbcTemplate.query(SELECT_SQL,
+                    (rs, rowNum) -> {
+                        SessionsRow row = new SessionsRow();
+                        row.setId(rs.getString(1));
+                        row.setIp(rs.getString(2));
+                        row.setSessionStartTime(rs.getString(3));
+                        row.setSessionEndTime(rs.getString(4));
+                        row.setOperation(rs.getString(5));
+                        return row;
+                    });
+            return dbRows;
     }
 
     public List<DBRow> selectDataFromBD(String mode, String order, String id) {
@@ -122,109 +157,26 @@ public class JDBC {
                 modeStr = "TIME";
         }
 
-        final String SELECT_SQL = "SELECT * FROM HISTORY where ?=ID ORDER BY ? ?";
-        List<DBRow> dbRows = jdbcTemplate.query(SELECT_SQL, (rs, rowNum) -> {
-            DBRow row = new DBRow();
-            row.setId(rs.getString(1));
-            row.setIp(rs.getString(2));
-            row.setSessionStartTime(rs.getString(3));
-            row.setSessionEndTime(rs.getString(4));
-            row.setOperationName(rs.getString(5));
-            row.setOp1(rs.getString(6);
-            row.setOp2(rs.getString(7));
-            row.setAnswer(rs.getString(8));
-            row.setTime(rs.getString(9));
-            return row;
-        });
+        final String SELECT_SQL = "SELECT OPERATION, FIRSTOPERAND, SECONDOPERAND, ANSWER, TIME FROM HISTORY where '"+id+"'=ID ORDER BY "+modeStr+" "+orderStr;
+        List<DBRow> dbRows = jdbcTemplate.query(SELECT_SQL,
+                (rs, rowNum) -> {
+                    DBRow row = new DBRow();
+                    row.setOperationName(rs.getString(1));
+                    row.setOp1(rs.getString(2));
+                    row.setOp2(rs.getString(3));
+                    row.setAnswer(rs.getString(4));
+                    row.setTime(rs.getString(5));
+                    return row;
+                });
         return dbRows;
     }
 
-    private ResultSet getResultSet(String mode, String order, Statement statement, String id) throws SQLException {
-        ResultSet rs;
-
-    }
-
-    private ResultSet getResultSessionsSet(String mode, String order, Statement statement) throws SQLException {
-        Class a = (org.apache.tiles.extras.complete.CompleteAutoloadTilesListener.class);
-        ResultSet rs;
-        String orderStr;
-        String modeStr;
-        if ("desc".equals(order)) {
-            orderStr = "desc";
-        } else {
-            orderStr = "asc";
-        }
-        if (mode == null)
-            mode = "";
-        switch (mode) {
-            case "idSession":
-                modeStr = "ID";
-                break;
-            case "ip":
-                modeStr = "IP";
-                break;
-            case "timeStart":
-                modeStr = "TIMESTART";
-                break;
-            case "timeEnd":
-                modeStr = "TIMEEND";
-                break;
-            default:
-                modeStr = "ID";
-        }
-
-        rs = statement.executeQuery("select * from (select distinct sessions.id, sessions.ip,sessions.timestart,sessions.timeend, 'false' as operation from SESSIONS left join history on SESSIONS.id = HISTORY.id where operation is null\n" +
-                "union all\n" +
-                "select distinct sessions.id, sessions.ip,sessions.timestart,sessions.timeend, 'true' as operation from SESSIONS left join history on SESSIONS.id = HISTORY.id where operation is not null) order by " + modeStr + " " + orderStr);
-        return rs;
-    }
-
-
-    private List<SessionsRow> createSessionsList(ResultSet rs) throws SQLException {
-        List<SessionsRow> rows = new ArrayList<>();
-        while (rs.next()) {
-            SessionsRow row = new SessionsRow(rs);
-            rows.add(row);
-        }
-        return rows;
-    }
-
     public class DBRow {
-        private String id;
-        private String ip;
-        private String sessionStartTime;
-        private String sessionEndTime;
         private String operationName;
         private String op1;
         private String op2;
-
-        private DBRow(ResultSet rs) throws SQLException {
-            id = rs.getString(1);
-            ip = rs.getString(2);
-            sessionStartTime = rs.getString(3);
-            sessionEndTime = rs.getString(4);
-            operationName = rs.getString(5);
-            op1 = rs.getString(6);
-            op2 = rs.getString(7);
-            answer = rs.getString(8);
-            time = rs.getString(9);
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public void setIp(String ip) {
-            this.ip = ip;
-        }
-
-        public void setSessionStartTime(String sessionStartTime) {
-            this.sessionStartTime = sessionStartTime;
-        }
-
-        public void setSessionEndTime(String sessionEndTime) {
-            this.sessionEndTime = sessionEndTime;
-        }
+        private String answer;
+        private String time;
 
         public void setOperationName(String operationName) {
             this.operationName = operationName;
@@ -244,28 +196,6 @@ public class JDBC {
 
         public void setTime(String time) {
             this.time = time;
-        }
-
-        public String answer;
-        public String time;
-
-        public DBRow() {
-        }
-
-        public String id() {
-            return id;
-        }
-
-        public String ip() {
-            return ip;
-        }
-
-        public String sessionStartTime() {
-            return sessionStartTime;
-        }
-
-        public String sessionEndTime() {
-            return sessionEndTime;
         }
 
         public String operationName() {
@@ -294,6 +224,7 @@ public class JDBC {
         private String ip;
         private String sessionStartTime;
         private String sessionEndTime;
+        private String operation;
 
         public void setId(String id) {
             this.id = id;
@@ -313,16 +244,6 @@ public class JDBC {
 
         public void setOperation(String operation) {
             this.operation = operation;
-        }
-
-        private String operation;
-
-        private SessionsRow(ResultSet rs) throws SQLException {
-            id = rs.getString(1);
-            ip = rs.getString(2);
-            sessionStartTime = rs.getString(3);
-            sessionEndTime = rs.getString(4);
-            operation = rs.getString(5);
         }
 
         public String id() {
