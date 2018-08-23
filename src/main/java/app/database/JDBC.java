@@ -4,6 +4,8 @@ import app.pagesLogic.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -18,15 +20,14 @@ import java.util.List;
 public class JDBC {
 
     @Autowired
-    DataSource getDataSource;
+    DataSource dataSource;
 
-    private static final String QUERY = "SELECT * FROM HISTORY";
     private JdbcTemplate jdbcTemplate;
 
     @PostConstruct
     public void init() {
-        System.out.println("JDBCExample postConstruct is called. datasource = " + getDataSource);
-        jdbcTemplate = new JdbcTemplate(getDataSource);
+        System.out.println("JDBCExample postConstruct is called. datasource = " + dataSource);
+        jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     public void insertSessionTime(HttpServletRequest req) {
@@ -81,7 +82,7 @@ public class JDBC {
     }
 
     public List<SessionsRow> selectSessionsFromBD(String mode, String order) {
-        try (Connection connection = getDataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             Statement statement = connection.createStatement();
             ResultSet rs = getResultSessionsSet(mode, order, statement);
             return createSessionsList(rs);
@@ -92,18 +93,6 @@ public class JDBC {
     }
 
     public List<DBRow> selectDataFromBD(String mode, String order, String id) {
-        try (Connection connection = getDataSource.getConnection()) {
-            Statement statement = connection.createStatement();
-            ResultSet rs = getResultSet(mode, order, statement, id);
-            return createRowList(rs);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return null;
-    }
-
-    private ResultSet getResultSet(String mode, String order, Statement statement, String id) throws SQLException {
-        ResultSet rs;
         String orderStr;
         String modeStr;
         if ("desc".equals(order)) {
@@ -133,8 +122,26 @@ public class JDBC {
                 modeStr = "TIME";
         }
 
-        rs = statement.executeQuery(QUERY + " where '" + id + "'=ID ORDER BY " + modeStr + " " + orderStr);
-        return rs;
+        final String SELECT_SQL = "SELECT * FROM HISTORY where ?=ID ORDER BY ? ?";
+        List<DBRow> dbRows = jdbcTemplate.query(SELECT_SQL, (rs, rowNum) -> {
+            DBRow row = new DBRow();
+            row.setId(rs.getString(1));
+            row.setIp(rs.getString(2));
+            row.setSessionStartTime(rs.getString(3));
+            row.setSessionEndTime(rs.getString(4));
+            row.setOperationName(rs.getString(5));
+            row.setOp1(rs.getString(6);
+            row.setOp2(rs.getString(7));
+            row.setAnswer(rs.getString(8));
+            row.setTime(rs.getString(9));
+            return row;
+        });
+        return dbRows;
+    }
+
+    private ResultSet getResultSet(String mode, String order, Statement statement, String id) throws SQLException {
+        ResultSet rs;
+
     }
 
     private ResultSet getResultSessionsSet(String mode, String order, Statement statement) throws SQLException {
@@ -182,25 +189,14 @@ public class JDBC {
         return rows;
     }
 
-    private List<DBRow> createRowList(ResultSet rs) throws SQLException {
-        List<DBRow> rows = new ArrayList<>();
-        while (rs.next()) {
-            DBRow row = new DBRow(rs);
-            rows.add(row);
-        }
-        return rows;
-    }
-
     public class DBRow {
-        public String id;
-        public String ip;
-        public String sessionStartTime;
-        public String sessionEndTime;
-        public String operationName;
-        public String op1;
-        public String op2;
-        public String answer;
-        public String time;
+        private String id;
+        private String ip;
+        private String sessionStartTime;
+        private String sessionEndTime;
+        private String operationName;
+        private String op1;
+        private String op2;
 
         private DBRow(ResultSet rs) throws SQLException {
             id = rs.getString(1);
@@ -212,6 +208,48 @@ public class JDBC {
             op2 = rs.getString(7);
             answer = rs.getString(8);
             time = rs.getString(9);
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public void setIp(String ip) {
+            this.ip = ip;
+        }
+
+        public void setSessionStartTime(String sessionStartTime) {
+            this.sessionStartTime = sessionStartTime;
+        }
+
+        public void setSessionEndTime(String sessionEndTime) {
+            this.sessionEndTime = sessionEndTime;
+        }
+
+        public void setOperationName(String operationName) {
+            this.operationName = operationName;
+        }
+
+        public void setOp1(String op1) {
+            this.op1 = op1;
+        }
+
+        public void setOp2(String op2) {
+            this.op2 = op2;
+        }
+
+        public void setAnswer(String answer) {
+            this.answer = answer;
+        }
+
+        public void setTime(String time) {
+            this.time = time;
+        }
+
+        public String answer;
+        public String time;
+
+        public DBRow() {
         }
 
         public String id() {
@@ -252,11 +290,32 @@ public class JDBC {
     }
 
     public class SessionsRow {
-        public String id;
-        public String ip;
-        public String sessionStartTime;
-        public String sessionEndTime;
-        public String operation;
+        private String id;
+        private String ip;
+        private String sessionStartTime;
+        private String sessionEndTime;
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public void setIp(String ip) {
+            this.ip = ip;
+        }
+
+        public void setSessionStartTime(String sessionStartTime) {
+            this.sessionStartTime = sessionStartTime;
+        }
+
+        public void setSessionEndTime(String sessionEndTime) {
+            this.sessionEndTime = sessionEndTime;
+        }
+
+        public void setOperation(String operation) {
+            this.operation = operation;
+        }
+
+        private String operation;
 
         private SessionsRow(ResultSet rs) throws SQLException {
             id = rs.getString(1);
