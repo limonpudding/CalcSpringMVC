@@ -1,5 +1,6 @@
 package app;
 
+import app.database.JDBC;
 import app.pagesLogic.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,23 +26,35 @@ public class MainController {
     }*/
     @Autowired
     AnnotationConfigWebApplicationContext context;
+    @Autowired
+    HttpServletRequest req;
+    @Autowired
+    JDBC jdbc;
+
+    private void init(){
+        jdbc.updateSessionEndTime(req);
+    }
 
     //TODO привязать через Autowired и Qualifier реализации созданного абстрактного класса для каждого представления свою.
 
     @RequestMapping(path = "/")
     public ModelAndView getHome() throws Exception {
+        init();
+        System.out.println(jdbc.toString()+" вот оно");
         Page page = (Page)context.getBean("getHome");
         return page.build();
     }
 
     @RequestMapping(path = "/calc")
     public ModelAndView getCalc() throws Exception {
+        init();
         Page page = (Page)context.getBean("getCalc");
         return page.build();
     }
 
     @RequestMapping(path = "/ophistory")
     public ModelAndView getOperationHistory() throws Exception {
+        init();
         Page page = (Page)context.getBean("getOpHistory");
         return page.build();
     }
@@ -51,6 +65,7 @@ public class MainController {
             @RequestParam(value = "b") String b,
             @RequestParam(value = "operation") String operation,
             HttpSession session) throws Exception {
+        init();
         //TODO убрать получение экземпляра напрямую из контекста.
         Page page = (Page)context.getBean("getAnswer");
         Map<String, Object> params = new HashMap<>();
@@ -68,6 +83,7 @@ public class MainController {
             @RequestParam(value = "mode") String mode,
             @RequestParam(value = "order") String order,
             @RequestParam(value = "table") String table) throws Exception {
+        init();
         Page page = (Page)context.getBean("getTables");
         Map<String, Object> params = new HashMap<>();
         params.put("id", id);
@@ -80,12 +96,14 @@ public class MainController {
 
     @RequestMapping(path = "/about")
     public ModelAndView getAbout() throws Exception {
+        init();
         Page page = (Page)context.getBean("getAbout");
         return page.build();
     }
 
     @RequestMapping(path = "/*")
     public ModelAndView getError() throws Exception {
+        init();
         Page page = (Page)context.getBean("getError");
         return page.build();
     }

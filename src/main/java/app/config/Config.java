@@ -16,13 +16,13 @@ import java.sql.Statement;
 public class Config extends WebMvcConfigurerAdapter {
 
     @Bean
-    DataSource getDataSource(@Value("H2") String DBName) {
+    DataSource getDataSource(@Value("oracle") String DBName) {
         if (DBName.toUpperCase().contains("H2")) {
             SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
             dataSource.setDriverClass(org.h2.Driver.class);
-            dataSource.setUsername("internship");
+            dataSource.setUsername("limon");
             dataSource.setUrl("jdbc:h2:mem:test");
-            dataSource.setPassword("internship");
+            dataSource.setPassword("limon");
 
             try (Connection connection = dataSource.getConnection()) {
                 Statement statement = connection.createStatement();
