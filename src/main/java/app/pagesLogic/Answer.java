@@ -19,7 +19,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.UUID;
 
-@Service
+@Service("getAnswer")
 //TODO создать абстрактный класс, наследовать от него.
 public class Answer extends Page {
     public ModelAndView build() throws Exception {

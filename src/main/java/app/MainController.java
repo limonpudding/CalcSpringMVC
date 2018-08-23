@@ -29,19 +29,19 @@ public class MainController {
 
     @RequestMapping(path = "/")
     public ModelAndView getHome() throws Exception {
-        Page page = context.getBean(Page.class,"getHome");
+        Page page = (Page)context.getBean("getHome");
         return page.build();
     }
 
     @RequestMapping(path = "/calc")
     public ModelAndView getCalc() throws Exception {
-        Page page = context.getBean(Page.class,"getCalc");
+        Page page = (Page)context.getBean("getCalc");
         return page.build();
     }
 
     @RequestMapping(path = "/ophistory")
     public ModelAndView getOperationHistory() throws Exception {
-        Page page = context.getBean(Page.class,"getOpHistory");
+        Page page = (Page)context.getBean("getOpHistory");
         return page.build();
     }
 
@@ -52,7 +52,7 @@ public class MainController {
             @RequestParam(value = "operation") String operation,
             HttpSession session) throws Exception {
         //TODO убрать получение экземпляра напрямую из контекста.
-        Page page = context.getBean(Page.class,"getAnswer");
+        Page page = (Page)context.getBean("getAnswer");
         Map<String, Object> params = new HashMap<>();
         params.put("a", a);
         params.put("b", b);
@@ -64,13 +64,13 @@ public class MainController {
 
     @RequestMapping(path = "/about")
     public ModelAndView getAbout() throws Exception {
-        Page page = context.getBean(Page.class,"getAbout");
+        Page page = (Page)context.getBean("getAbout");
         return page.build();
     }
 
     @RequestMapping(path = "/*")
     public ModelAndView getError() throws Exception {
-        Page page = context.getBean(Page.class,"getError");
+        Page page = (Page)context.getBean("getError");
         return page.build();
     }
 }

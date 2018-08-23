@@ -3,7 +3,7 @@ package app.pagesLogic;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
-@Service
+@Service("getAbout")
 public class About extends Page {
     @Override
     public ModelAndView build() {
