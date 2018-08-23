@@ -2,27 +2,34 @@ package app.config;
 
 
 import app.pagesLogic.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 @Configuration
 public class Config extends WebMvcConfigurerAdapter {
 
+    @Autowired
+    ServletContext context;
+
     @Bean
-    DataSource getDataSource(@Value("oracle") String DBName) {
-        if (DBName.toUpperCase().contains("H2")) {
-            SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-            dataSource.setDriverClass(org.h2.Driver.class);
-            dataSource.setUsername("limon");
-            dataSource.setUrl("jdbc:h2:mem:test");
-            dataSource.setPassword("limon");
+    DataSource getDataSource() throws NamingException, SQLException {
+        String dbName = context.getInitParameter("dbName");
+        DataSource dataSource = (DataSource) new  InitialContext().lookup("java:comp/env/" + dbName);
+        if (dataSource.getConnection().getMetaData().getDatabaseProductName().toUpperCase().contains("H2")) {
 
             try (Connection connection = dataSource.getConnection()) {
                 Statement statement = connection.createStatement();
@@ -159,12 +166,7 @@ public class Config extends WebMvcConfigurerAdapter {
             }
 
             return dataSource;
-        } else if (DBName.toUpperCase().contains("ORACLE")) {
-            SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-            dataSource.setDriverClass(oracle.jdbc.driver.OracleDriver.class);
-            dataSource.setUsername("internship");
-            dataSource.setUrl("jdbc:oracle:thin:@192.168.1.151:1521:gmudb");
-            dataSource.setPassword("internship");
+        } else if (dataSource.getConnection().getMetaData().getDatabaseProductName().toUpperCase().contains("ORACLE")) {
             return dataSource;
         } else {
             return null;
