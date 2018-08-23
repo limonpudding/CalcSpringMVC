@@ -40,7 +40,11 @@ public class MainController {
     Page getOpHistory;
 
     private void init(){
-        jdbc.updateSessionEndTime(req);
+        if (req.getSession().isNew()) {
+            jdbc.insertSessionTime(req);
+        } else {
+            jdbc.updateSessionEndTime(req);
+        }
     }
 
     //TODO привязать через Autowired и Qualifier реализации созданного абстрактного класса для каждого представления свою.

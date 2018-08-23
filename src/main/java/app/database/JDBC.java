@@ -3,6 +3,7 @@ package app.database;
 import app.pagesLogic.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -21,59 +22,61 @@ public class JDBC {
 
     private static final String QUERY = "SELECT * FROM HISTORY";
     private JdbcTemplate jdbcTemplate;
+
     @PostConstruct
     public void init() {
         System.out.println("JDBCExample postConstruct is called. datasource = " + getDataSource);
         jdbcTemplate = new JdbcTemplate(getDataSource);
     }
 
-    public void updateSessionEndTime(HttpServletRequest req){
-        try (Connection connection = getDataSource.getConnection()) {
-            PreparedStatement insert = connection.prepareStatement("insert into SESSIONS (ID, IP, TIMESTART, TIMEEND) values (?,?,?,?)");
-            PreparedStatement update = connection.prepareStatement("update SESSIONS set TIMEEND=? where SESSIONS.ID =?");
+    public void insertSessionTime(HttpServletRequest req) {
+        final String INSERT_SQL = "insert into SESSIONS (ID, IP, TIMESTART, TIMEEND) values (?,?,?,?)";
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL);
+            preparedStatement.setString(1, req.getSession().getId());
+            preparedStatement.setString(2, req.getRemoteAddr());
+            preparedStatement.setTimestamp(3, new java.sql.Timestamp(req.getSession().getCreationTime()));
+            preparedStatement.setTimestamp(4, new java.sql.Timestamp(req.getSession().getCreationTime()));
+            return preparedStatement;
+        });
+    }
 
-            insert.setString(1, req.getSession().getId());
-            insert.setString(2, req.getRemoteAddr());
-            insert.setTimestamp(3, new java.sql.Timestamp(req.getSession().getCreationTime()));
-            insert.setTimestamp(4, new java.sql.Timestamp(req.getSession().getCreationTime()));
-
-            update.setTimestamp(1, new java.sql.Timestamp(req.getSession().getLastAccessedTime()));
-            update.setString(2, req.getSession().getId());
-
-            if (req.getSession().isNew()) {
-                insert.executeUpdate();
-            } else {
-                update.executeUpdate();
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+    public void updateSessionEndTime(HttpServletRequest req) {
+        final String UPDATE_SQL = "update SESSIONS set TIMEEND=? where SESSIONS.ID =?";
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
+            preparedStatement.setTimestamp(1, new java.sql.Timestamp(req.getSession().getLastAccessedTime()));
+            preparedStatement.setString(2, req.getSession().getId());
+            return preparedStatement;
+        });
     }
 
     public void putDataInBD(Operation operation, HttpSession session) {
-        try (Connection connection = getDataSource.getConnection()) {
-            switch (operation.getOperation()) {
-                case "fib":
-                    PreparedStatement fibonacci = connection.prepareStatement("insert into " + operation.getOperation() + " (ID, FIRSTOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?)");
-                    fibonacci.setString(1, operation.getIdOperation());
-                    fibonacci.setString(2, operation.getA());
-                    fibonacci.setString(3, operation.getResult());
-                    fibonacci.setString(4, session.getId());
-                    fibonacci.setTimestamp(5, new Timestamp(operation.getDate().getTime()));
-                    fibonacci.executeUpdate();
-                    break;
-                default:
-                    PreparedStatement arithmetic = connection.prepareStatement("insert into " + operation.getOperation()+ " (ID, FIRSTOPERAND, SECONDOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?,?)");
-                    arithmetic.setString(1, operation.getIdOperation());
-                    arithmetic.setString(2, operation.getA());
-                    arithmetic.setString(3, operation.getB());
-                    arithmetic.setString(4, operation.getResult());
-                    arithmetic.setString(5, session.getId());
-                    arithmetic.setTimestamp(6, new Timestamp(operation.getDate().getTime()));
-                    arithmetic.executeUpdate();
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        String OPER_SQL = "insert into " + operation.getOperation() + " (ID, FIRSTOPERAND, SECONDOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?,?)";
+        String FIB_SQL = "insert into " + operation.getOperation() + " (ID, FIRSTOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?)";
+        switch (operation.getOperation()) {
+            case "fib":
+                jdbcTemplate.update(connection -> {
+                    PreparedStatement preparedStatement = connection.prepareStatement(FIB_SQL);
+                    preparedStatement.setString(1, operation.getIdOperation());
+                    preparedStatement.setString(2, operation.getA());
+                    preparedStatement.setString(3, operation.getResult());
+                    preparedStatement.setString(4, session.getId());
+                    preparedStatement.setTimestamp(5, new Timestamp(operation.getDate().getTime()));
+                    return preparedStatement;
+                });
+                break;
+            default:
+                jdbcTemplate.update(connection -> {
+                    PreparedStatement preparedStatement = connection.prepareStatement(OPER_SQL);
+                    preparedStatement.setString(1, operation.getIdOperation());
+                    preparedStatement.setString(2, operation.getA());
+                    preparedStatement.setString(3, operation.getB());
+                    preparedStatement.setString(4, operation.getResult());
+                    preparedStatement.setString(5, session.getId());
+                    preparedStatement.setTimestamp(6, new Timestamp(operation.getDate().getTime()));
+                    return preparedStatement;
+                });
         }
     }
 
