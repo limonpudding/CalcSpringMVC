@@ -20,12 +20,12 @@ public class JDBC {
     DataSource getDataSource;
 
     private static final String QUERY = "SELECT * FROM HISTORY";
-
+    private JdbcTemplate jdbcTemplate;
     @PostConstruct
     public void init() {
         System.out.println("JDBCExample postConstruct is called. datasource = " + getDataSource);
+        jdbcTemplate = new JdbcTemplate(getDataSource);
     }
-
 
     public void updateSessionEndTime(HttpServletRequest req){
         try (Connection connection = getDataSource.getConnection()) {

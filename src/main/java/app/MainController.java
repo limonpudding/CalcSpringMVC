@@ -18,18 +18,26 @@ import java.util.Map;
 @Controller
 public class MainController {
 
-/*    @RequestMapping(path ="/*", method = RequestMethod.GET)
-    public String getIndex(@RequestParam(value="name", required=true) String name, Model model){
-
-        System.out.println(name);
-        return "index";
-    }*/
     @Autowired
     AnnotationConfigWebApplicationContext context;
     @Autowired
     HttpServletRequest req;
     @Autowired
     JDBC jdbc;
+    @Autowired
+    Page getAbout;
+    @Autowired
+    Page getHome;
+    @Autowired
+    Page getTables;
+    @Autowired
+    Page getAnswer;
+    @Autowired
+    Page getError;
+    @Autowired
+    Page getCalc;
+    @Autowired
+    Page getOpHistory;
 
     private void init(){
         jdbc.updateSessionEndTime(req);
@@ -41,22 +49,19 @@ public class MainController {
     public ModelAndView getHome() throws Exception {
         init();
         System.out.println(jdbc.toString()+" вот оно");
-        Page page = (Page)context.getBean("getHome");
-        return page.build();
+        return getHome.build();
     }
 
     @RequestMapping(path = "/calc")
     public ModelAndView getCalc() throws Exception {
         init();
-        Page page = (Page)context.getBean("getCalc");
-        return page.build();
+        return getCalc.build();
     }
 
     @RequestMapping(path = "/ophistory")
     public ModelAndView getOperationHistory() throws Exception {
         init();
-        Page page = (Page)context.getBean("getOpHistory");
-        return page.build();
+        return getOpHistory.build();
     }
 
     @RequestMapping(path = "/answer")
@@ -67,14 +72,13 @@ public class MainController {
             HttpSession session) throws Exception {
         init();
         //TODO убрать получение экземпляра напрямую из контекста.
-        Page page = (Page)context.getBean("getAnswer");
         Map<String, Object> params = new HashMap<>();
         params.put("a", a);
         params.put("b", b);
         params.put("operation", operation);
         params.put("session", session);
-        page.setParams(params);
-        return page.build();
+        getAnswer.setParams(params);
+        return getAnswer.build();
     }
 
     @RequestMapping(path = "/tables")
@@ -84,27 +88,24 @@ public class MainController {
             @RequestParam(value = "order") String order,
             @RequestParam(value = "table") String table) throws Exception {
         init();
-        Page page = (Page)context.getBean("getTables");
         Map<String, Object> params = new HashMap<>();
         params.put("id", id);
         params.put("mode", mode);
         params.put("order", order);
         params.put("table", table);
-        page.setParams(params);
-        return page.build();
+        getTables.setParams(params);
+        return getTables.build();
     }
 
     @RequestMapping(path = "/about")
     public ModelAndView getAbout() throws Exception {
         init();
-        Page page = (Page)context.getBean("getAbout");
-        return page.build();
+        return getAbout.build();
     }
 
     @RequestMapping(path = "/*")
     public ModelAndView getError() throws Exception {
         init();
-        Page page = (Page)context.getBean("getError");
-        return page.build();
+        return getError.build();
     }
 }
