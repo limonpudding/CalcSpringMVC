@@ -4,7 +4,31 @@ package app.pagesLogic;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class Operation {
+public class Operation {
+    public String getOperation() {
+        return operation;
+    }
+
+    public String getA() {
+        return a;
+    }
+
+    public String getB() {
+        return b;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public String getIdOperation() {
+        return idOperation;
+    }
+
     String a;
     String b;
     String operation;
@@ -13,7 +37,7 @@ class Operation {
     String idOperation;
     SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 
-    Operation(){
+    Operation() {
     }
 
     Operation(Date date, String a, String b, String operation, String result, String idOperation) {
@@ -25,7 +49,7 @@ class Operation {
         this.idOperation = idOperation;
     }
 
-    public String date(){
+    public String date() {
         return formatForDateNow.format(date);
     }
 

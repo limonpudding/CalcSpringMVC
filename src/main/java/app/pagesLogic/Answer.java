@@ -1,10 +1,12 @@
 package app.pagesLogic;
 
+import app.database.JDBC;
 import app.math.Fibonacci;
 import app.math.LongArithmethic;
 import app.math.LongArithmeticImplList;
 import app.math.LongArithmeticMath;
 import org.hibernate.Session;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
@@ -22,6 +24,10 @@ import java.util.UUID;
 @Service("getAnswer")
 //TODO создать абстрактный класс, наследовать от него.
 public class Answer extends Page {
+
+    @Autowired
+    JDBC jdbc;
+
     public ModelAndView build() throws Exception {
         String a =(String) getParams().get("a");
         String b = (String) getParams().get("b");
@@ -33,6 +39,8 @@ public class Answer extends Page {
         operationsHistory.getHistory(session);
 
         Operation oper = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
+
+        jdbc.putDataInBD(oper, session);
 
         operationsHistory.addOperation(oper);
 
@@ -73,30 +81,5 @@ public class Answer extends Page {
         return res.toString();
     }
 
-//    private void putDataInBD(Operation operation, HttpServletRequest req) {
-//        try (Connection connection = dataBase.getValue().getConnection()) {
-//            switch (operation.operation) {
-//                case "fib":
-//                    PreparedStatement fibonacci = connection.prepareStatement("insert into " + operation.operation + " (ID, FIRSTOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?)");
-//                    fibonacci.setString(1, operation.idOperation);
-//                    fibonacci.setString(2, operation.a);
-//                    fibonacci.setString(3, operation.result);
-//                    fibonacci.setString(4, req.getSession().getId());
-//                    fibonacci.setTimestamp(5, new Timestamp(operation.date.getTime()));
-//                    fibonacci.executeUpdate();
-//                    break;
-//                default:
-//                    PreparedStatement arithmetic = connection.prepareStatement("insert into " + operation.operation + " (ID, FIRSTOPERAND, SECONDOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?,?)");
-//                    arithmetic.setString(1, operation.idOperation);
-//                    arithmetic.setString(2, operation.a);
-//                    arithmetic.setString(3, operation.b);
-//                    arithmetic.setString(4, operation.result);
-//                    arithmetic.setString(5, req.getSession().getId());
-//                    arithmetic.setTimestamp(6, new Timestamp(operation.date.getTime()));
-//                    arithmetic.executeUpdate();
-//            }
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//        }
-//    }
+
 }

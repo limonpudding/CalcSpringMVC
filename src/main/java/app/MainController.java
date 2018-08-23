@@ -62,6 +62,22 @@ public class MainController {
         return page.build();
     }
 
+    @RequestMapping(path = "/tables")
+    public ModelAndView getTables(
+            @RequestParam(value = "id", required = false) String id,
+            @RequestParam(value = "mode") String mode,
+            @RequestParam(value = "order") String order,
+            @RequestParam(value = "table") String table) throws Exception {
+        Page page = (Page)context.getBean("getTables");
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("mode", mode);
+        params.put("order", order);
+        params.put("table", table);
+        page.setParams(params);
+        return page.build();
+    }
+
     @RequestMapping(path = "/about")
     public ModelAndView getAbout() throws Exception {
         Page page = (Page)context.getBean("getAbout");

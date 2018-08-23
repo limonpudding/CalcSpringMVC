@@ -5,6 +5,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
 import app.config.Config;
+import app.config.ServiceListener;
 import app.config.WebConfig;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.web.context.ContextLoaderListener;
@@ -23,10 +24,9 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
 
         // Manage the lifecycle of the root application context
         container.addListener(org.apache.tiles.extras.complete.CompleteAutoloadTilesListener.class);
-
+        container.addListener(ServiceListener.class);
 
         container.setInitParameter("DBName", "jdbc/db");
-
 
 
         // Create the dispatcher servlet's Spring application context
