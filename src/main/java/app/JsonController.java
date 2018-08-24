@@ -6,6 +6,7 @@ import app.pagesLogic.Operation;
 import app.pagesLogic.Page;
 import app.pagesLogic.RESTParams;
 import app.rest.Constant;
+import app.rest.Key;
 import app.rest.UpdatePost;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 @RestController
 public class JsonController {
@@ -38,13 +40,20 @@ public class JsonController {
             @RequestParam(value = "a") String a,
             @RequestParam(value = "b") String b,
             @RequestParam(value = "operation") String operation) throws Exception {
+        String regex = "^[-+]?[0-9]+$";
+        if (!a.matches(regex)) {
+            a = jdbc.getConstantValueDB(a);
+        }
+        if (!b.matches(regex)) {
+            b = jdbc.getConstantValueDB(b);
+        }
         String ans = Answer.calc(a, b, operation);
         Operation operationObject = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
         jdbc.putDataInBD(operationObject);
         return new ResponseEntity<>(operationObject, HttpStatus.OK);
     }
 
-    @RequestMapping(path = "/rest/post", method = RequestMethod.POST, headers = "Accept=application/json", produces = "application/json")
+    @RequestMapping(path = "/rest/post", method = RequestMethod.POST)
     public @ResponseBody
     ResponseEntity updateConst(@RequestBody UpdatePost post) throws Exception {
         String keyOld = post.getKeyOld();
@@ -55,14 +64,14 @@ public class JsonController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @RequestMapping(path = "/rest/put", method = RequestMethod.PUT, headers = "Accept=application/json", produces = "application/json")
+    @RequestMapping(path = "/rest/put", method = RequestMethod.PUT)
     public @ResponseBody
     ResponseEntity putConst(@RequestBody Constant constant) throws Exception {
         jdbc.putConstInDB(constant);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @RequestMapping(path = "/rest/patch", method = RequestMethod.PATCH, headers = "Accept=application/json", produces = "application/json")
+    @RequestMapping(path = "/rest/patch", method = RequestMethod.PATCH)
     public @ResponseBody
     ResponseEntity updateValue(@RequestBody Constant constant) throws Exception {
         jdbc.updatePatchDB(constant);
@@ -71,8 +80,8 @@ public class JsonController {
 
     @RequestMapping(path = "/rest/delete", method = RequestMethod.DELETE)
     public @ResponseBody
-    ResponseEntity deleteConst(@RequestBody String key) throws Exception {
-        jdbc.deleteConstantDB(key);
+    ResponseEntity deleteConst(@RequestBody Key key) throws Exception {
+        jdbc.deleteConstantDB(key.getKey());
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 

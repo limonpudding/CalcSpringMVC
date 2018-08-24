@@ -54,7 +54,7 @@ public class JDBC {
     }
 
     public void updatePostDB(String key, Constant constant) {
-        final String UPDATE_SQL = "update CONSTANTS set KEY = ?, VALUE = ? WHERE KEY = ?";
+        final String UPDATE_SQL = "update CONSTANTS set CONSTANTS.KEY = ?, CONSTANTS.VALUE = ? WHERE CONSTANTS.KEY = ?";
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
             preparedStatement.setString(1, constant.getKey());
@@ -66,7 +66,7 @@ public class JDBC {
     }
 
     public void deleteConstantDB(String key) {
-        final String DELETE_SQL = "DELETE FROM CONSTANTS WHERE KEY = ?";
+        final String DELETE_SQL = "DELETE FROM CONSTANTS WHERE CONSTANTS.KEY = ?";
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL);
             preparedStatement.setString(1, key);
@@ -76,27 +76,27 @@ public class JDBC {
     }
 
     public void updatePatchDB(Constant constant) {
-        final String UPDATE_SQL = "update CONSTANTS set VALUE = ? WHERE KEY = ?";
+        final String UPDATE_SQL = "update CONSTANTS set CONSTANTS.VALUE = ? WHERE CONSTANTS.KEY = ?";
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
-            preparedStatement.setString(1, constant.getKey());
-            preparedStatement.setString(2, constant.getValue());
+            preparedStatement.setString(1, constant.getValue());
+            preparedStatement.setString(2, constant.getKey());
             return preparedStatement;
         });
         rootLogger.info("В базе данных обновлена сессия с ID: " + session.getId());
     }
 
     public List<Constant> getConstantsDB() {
-        final String SELECT_SQL = "SELECT KEY, VALUE FROM CONSTANTS";
+        final String SELECT_SQL = "SELECT CONSTANTS.KEY, CONSTANTS.VALUE FROM CONSTANTS";
         List<Constant> dbRows = jdbcTemplate.query(SELECT_SQL,
                 (rs, rowNum) -> new Constant(rs.getString("KEY"), rs.getString("VALUE")));
         return dbRows;
     }
 
     public String getConstantValueDB(String key) {
-        final String SELECT_SQL = "SELECT VALUE FROM CONSTANTS where KEY = '" + key + "'";
+        final String SELECT_SQL = "SELECT CONSTANTS.VALUE FROM CONSTANTS where CONSTANTS.KEY = '" + key + "'";
         List<String> dbRows = jdbcTemplate.query(SELECT_SQL,
-                (rs, rowNum) -> rs.getString("KEY"));
+                (rs, rowNum) -> rs.getString(1));
         return dbRows.get(0);
     }
 
