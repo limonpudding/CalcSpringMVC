@@ -1,18 +1,23 @@
 package app;
 
 import app.database.JDBC;
+import app.pagesLogic.Answer;
+import app.pagesLogic.Operation;
 import app.pagesLogic.Page;
+import app.pagesLogic.RESTParams;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 public class MainController {
@@ -112,5 +117,17 @@ public class MainController {
     public ModelAndView getError() throws Exception {
         init();
         return getError.build();
+    }
+
+    @RequestMapping(path = "/rest/", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<Operation> getJSON(@RequestBody RESTParams restOperands) throws Exception {
+        init();
+        String a = restOperands.getA();
+        String b = restOperands.getB();
+        String operation = restOperands.getOperation();
+        String ans = Answer.calc(a, b, operation);
+        Operation operationObject = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
+        return new ResponseEntity<Operation>(operationObject, HttpStatus.OK);
     }
 }

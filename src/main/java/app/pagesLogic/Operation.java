@@ -40,7 +40,7 @@ public class Operation {
     Operation() {
     }
 
-    Operation(Date date, String a, String b, String operation, String result, String idOperation) {
+    public Operation(Date date, String a, String b, String operation, String result, String idOperation) {
         this.date = date;
         this.a = a;
         this.b = b;
