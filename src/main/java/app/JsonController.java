@@ -46,49 +46,40 @@ public class JsonController {
 
     @RequestMapping(path = "/rest/post", method = RequestMethod.POST, headers = "Accept=application/json", produces = "application/json")
     public @ResponseBody
-    HttpStatus updateConst(@RequestBody UpdatePost post) throws Exception {
+    ResponseEntity updateConst(@RequestBody UpdatePost post) throws Exception {
         String keyOld = post.getKeyOld();
         String keyNew = post.getKeyNew();
         String value = post.getValue();
-        jdbc.putDataInBD(operationObject);
-        return HttpStatus.OK;
+        Constant constant = new Constant(keyNew, value);
+        jdbc.updatePostDB(keyOld, constant);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @RequestMapping(path = "/rest/put", method = RequestMethod.PUT, headers = "Accept=application/json", produces = "application/json")
     public @ResponseBody
-    ResponseEntity<Operation> putConst(@RequestBody Constant constant) throws Exception {
-        String key = constant.getKey();
-        String value = constant.getValue();
-        jdbc.putDataInBD(operationObject);
-        return new ResponseEntity<>(operationObject, HttpStatus.OK);
+    ResponseEntity putConst(@RequestBody Constant constant) throws Exception {
+        jdbc.putConst(constant);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @RequestMapping(path = "/rest/patch", method = RequestMethod.PATCH, headers = "Accept=application/json", produces = "application/json")
     public @ResponseBody
-    ResponseEntity<Operation> updateValue(@RequestBody UpdatePost post) throws Exception {
-        String keyOld = post.getKeyOld();
-        String keyNew = post.getKeyNew();
-        String value = post.getValue();
-        jdbc.putDataInBD(operationObject);
-        return new ResponseEntity<>(operationObject, HttpStatus.OK);
+    ResponseEntity updateValue(@RequestBody Constant constant) throws Exception {
+        jdbc.updatePatchDB(constant);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @RequestMapping(path = "/rest/delete", method = RequestMethod.DELETE, headers = "Accept=application/json", produces = "application/json")
+    @RequestMapping(path = "/rest/delete", method = RequestMethod.DELETE)
     public @ResponseBody
-    ResponseEntity<Operation> deleteConst(@RequestBody UpdatePost post) throws Exception {
-        String keyOld = post.getKeyOld();
-        String keyNew = post.getKeyNew();
-        String value = post.getValue();
-        jdbc.putDataInBD(operationObject);
-        return new ResponseEntity<>(operationObject, HttpStatus.OK);
+    ResponseEntity deleteConst(@RequestBody String key) throws Exception {
+        jdbc.deleteConstantDB(key);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @RequestMapping(path = "/rest/get", method = RequestMethod.GET)
     public @ResponseBody
     ResponseEntity<List<Constant>> getConstants() throws Exception {
-        String ans = Answer.calc(a, b, operation);
-        Operation operationObject = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
-        List<Constant> constants = jdbc.putDataInBD(operationObject);
+        List<Constant> constants = jdbc.getConstantsDB();
         return new ResponseEntity<>(constants, HttpStatus.OK);
     }
 }
