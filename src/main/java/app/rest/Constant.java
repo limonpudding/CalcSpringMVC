@@ -5,6 +5,8 @@ public class Constant {
     private String key;
     private String value;
 
+    Constant(){}
+
     public Constant(String key, String value) {
         this.key = key;
         this.value = value;

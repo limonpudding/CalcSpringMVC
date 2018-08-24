@@ -58,7 +58,7 @@ public class JsonController {
     @RequestMapping(path = "/rest/put", method = RequestMethod.PUT, headers = "Accept=application/json", produces = "application/json")
     public @ResponseBody
     ResponseEntity putConst(@RequestBody Constant constant) throws Exception {
-        jdbc.putConst(constant);
+        jdbc.putConstInDB(constant);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
