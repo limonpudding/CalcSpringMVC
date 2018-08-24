@@ -5,6 +5,8 @@ import app.pagesLogic.Answer;
 import app.pagesLogic.Operation;
 import app.pagesLogic.Page;
 import app.pagesLogic.RESTParams;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +34,10 @@ public class MainController {
     private final Page getError;
     private final Page getCalc;
     private final Page getOpHistory;
+    private final Logger rootLogger;
 
     @Autowired
-    public MainController(HttpServletRequest req, JDBC jdbc, Page getAbout, Page getHome, Page getTables, Page getAnswer, Page getError, Page getCalc, Page getOpHistory) {
+    public MainController(HttpServletRequest req, JDBC jdbc, Page getAbout, Page getHome, Page getTables, Page getAnswer, Page getError, Page getCalc, Page getOpHistory, Logger rootLogger) {
         this.req = req;
         this.jdbc = jdbc;
         this.getAbout = getAbout;
@@ -44,11 +47,13 @@ public class MainController {
         this.getError = getError;
         this.getCalc = getCalc;
         this.getOpHistory = getOpHistory;
+        this.rootLogger = rootLogger;
     }
 
     private void init() {
         if (req.getSession().isNew()) {
             jdbc.insertSessionTime();
+            rootLogger.info("Подключился пользователь с IP: "+req.getRemoteAddr());
         } else {
             jdbc.updateSessionEndTime();
         }
@@ -59,7 +64,6 @@ public class MainController {
     @RequestMapping(path = "/")
     public ModelAndView getHome() throws Exception {
         init();
-        System.out.println(jdbc.toString() + " вот оно");
         return getHome.build();
     }
 
@@ -120,8 +124,9 @@ public class MainController {
         return getError.build();
     }
 
-    @RequestMapping(path="/rest",method = RequestMethod.POST, headers = "Accept=application/json", produces = "application/json")
-    public @ResponseBody ResponseEntity<Operation> getJSON(@RequestBody RESTParams restOperands) throws Exception {
+    @RequestMapping(path = "/rest", method = RequestMethod.POST, headers = "Accept=application/json", produces = "application/json")
+    public @ResponseBody
+    ResponseEntity<Operation> getJSON(@RequestBody RESTParams restOperands) throws Exception {
         init();
         String a = restOperands.getA();
         String b = restOperands.getB();

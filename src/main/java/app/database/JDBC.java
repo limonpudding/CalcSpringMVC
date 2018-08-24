@@ -1,6 +1,7 @@
 package app.database;
 
 import app.pagesLogic.Operation;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,6 +25,7 @@ public class JDBC {
     @Autowired private HttpSession session;
     @Autowired private DataSource dataSource;
     @Autowired private HttpServletRequest req;
+    @Autowired private Logger rootLogger;
     private JdbcTemplate jdbcTemplate;
 
 
@@ -44,6 +46,7 @@ public class JDBC {
             preparedStatement.setTimestamp(4, new java.sql.Timestamp(req.getSession().getCreationTime()));
             return preparedStatement;
         });
+        rootLogger.info("В базу даных добалена новая сессия с ID: "+session.getId());
     }
 
     @Transactional
@@ -55,9 +58,11 @@ public class JDBC {
             preparedStatement.setString(2, session.getId());
             return preparedStatement;
         });
+        rootLogger.info("В базе данных обновлена сессия с ID: "+session.getId());
     }
 
     public void putDataInBD(Operation operation) {
+
         String OPER_SQL = "insert into " + operation.getOperation() + " (ID, FIRSTOPERAND, SECONDOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?,?)";
         String FIB_SQL = "insert into " + operation.getOperation() + " (ID, FIRSTOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?)";
         switch (operation.getOperation()) {
@@ -84,6 +89,7 @@ public class JDBC {
                     return preparedStatement;
                 });
         }
+        rootLogger.info("В базу данных была добавлена операция с ID: "+operation.getIdOperation());
     }
 
     public List<SessionsRow> selectSessionsFromBD(String mode, String order) {

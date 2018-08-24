@@ -1,6 +1,7 @@
 package app.config;
 
 import app.database.JDBC;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
@@ -19,15 +20,12 @@ import java.sql.PreparedStatement;
 
 @Service
 public class ServiceListener implements ServletRequestListener {
+
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
-        //System.out.println(sre.getServletContext().getContext().getInitParameter().getInitParameter("DBName");
-        System.out.println("Я сервайс");
     }
 
     @Override
     public void requestInitialized(ServletRequestEvent sre) {
-
-        System.out.println("Я сервайс");
     }
 }
