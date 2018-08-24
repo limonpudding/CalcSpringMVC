@@ -124,16 +124,5 @@ public class MainController {
         return getError.build();
     }
 
-    @RequestMapping(path = "/rest", method = RequestMethod.POST, headers = "Accept=application/json", produces = "application/json")
-    public @ResponseBody
-    ResponseEntity<Operation> getJSON(@RequestBody RESTParams restOperands) throws Exception {
-        init();
-        String a = restOperands.getA();
-        String b = restOperands.getB();
-        String operation = restOperands.getOperation();
-        String ans = Answer.calc(a, b, operation);
-        Operation operationObject = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
-        jdbc.putDataInBD(operationObject);
-        return new ResponseEntity<>(operationObject, HttpStatus.OK);
-    }
+
 }
