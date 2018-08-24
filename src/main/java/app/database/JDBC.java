@@ -1,6 +1,7 @@
 package app.database;
 
 import app.pagesLogic.Operation;
+import app.rest.Constant;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -22,18 +23,81 @@ import java.util.List;
 @Repository
 public class JDBC {
 
-    @Autowired private HttpSession session;
-    @Autowired private DataSource dataSource;
-    @Autowired private HttpServletRequest req;
-    @Autowired private Logger rootLogger;
+    @Autowired
+    private HttpSession session;
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private HttpServletRequest req;
+    @Autowired
+    private Logger rootLogger;
     private JdbcTemplate jdbcTemplate;
 
 
-    JDBC() {}
+    JDBC() {
+    }
+
     @PostConstruct
     public void init() {
         System.out.println("JDBCExample postConstruct is called. datasource = " + dataSource);
         jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    public void putConstInDB(Constant constant) {
+        final String INSERT_SQL = "insert into CONSTANTS (KEY, VALUE) values (?,?)";
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL);
+            preparedStatement.setString(1, constant.getKey());
+            preparedStatement.setString(2, constant.getValue());
+            return preparedStatement;
+        });
+    }
+
+    public void updatePostDB(String key, Constant constant) {
+        final String UPDATE_SQL = "update CONSTANTS set KEY = ?, VALUE = ? WHERE KEY = ?";
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
+            preparedStatement.setString(1, constant.getKey());
+            preparedStatement.setString(2, constant.getValue());
+            preparedStatement.setString(3, key);
+            return preparedStatement;
+        });
+        rootLogger.info("В базе данных обновлена сессия с ID: " + session.getId());
+    }
+
+    public void deleteConstantDB(String key) {
+        final String DELETE_SQL = "DELETE FROM CONSTANTS WHERE KEY = ?";
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL);
+            preparedStatement.setString(1, key);
+            return preparedStatement;
+        });
+        rootLogger.info("В базе данных обновлена сессия с ID: " + session.getId());
+    }
+
+    public void updatePatchDB(Constant constant) {
+        final String UPDATE_SQL = "update CONSTANTS set VALUE = ? WHERE KEY = ?";
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
+            preparedStatement.setString(1, constant.getKey());
+            preparedStatement.setString(2, constant.getValue());
+            return preparedStatement;
+        });
+        rootLogger.info("В базе данных обновлена сессия с ID: " + session.getId());
+    }
+
+    public List<Constant> getConstantsDB() {
+        final String SELECT_SQL = "SELECT KEY, VALUE FROM CONSTANTS";
+        List<Constant> dbRows = jdbcTemplate.query(SELECT_SQL,
+                (rs, rowNum) -> new Constant(rs.getString("KEY"), rs.getString("VALUE")));
+        return dbRows;
+    }
+
+    public String getConstantValueDB(String key) {
+        final String SELECT_SQL = "SELECT VALUE FROM CONSTANTS where KEY = '" + key + "'";
+        List<String> dbRows = jdbcTemplate.query(SELECT_SQL,
+                (rs, rowNum) -> rs.getString("KEY"));
+        return dbRows.get(0);
     }
 
     public void insertSessionTime() {
@@ -46,7 +110,7 @@ public class JDBC {
             preparedStatement.setTimestamp(4, new java.sql.Timestamp(req.getSession().getCreationTime()));
             return preparedStatement;
         });
-        rootLogger.info("В базу даных добалена новая сессия с ID: "+session.getId());
+        rootLogger.info("В базу даных добалена новая сессия с ID: " + session.getId());
     }
 
     @Transactional
@@ -58,7 +122,7 @@ public class JDBC {
             preparedStatement.setString(2, session.getId());
             return preparedStatement;
         });
-        rootLogger.info("В базе данных обновлена сессия с ID: "+session.getId());
+        rootLogger.info("В базе данных обновлена сессия с ID: " + session.getId());
     }
 
     public void putDataInBD(Operation operation) {
@@ -89,7 +153,7 @@ public class JDBC {
                     return preparedStatement;
                 });
         }
-        rootLogger.info("В базу данных была добавлена операция с ID: "+operation.getIdOperation());
+        rootLogger.info("В базу данных была добавлена операция с ID: " + operation.getIdOperation());
     }
 
     public List<SessionsRow> selectSessionsFromBD(String mode, String order) {

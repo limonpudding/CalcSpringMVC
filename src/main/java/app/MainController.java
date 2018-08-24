@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.UUID;
 
 @Controller
-@RestController
 public class MainController {
 
     private final HttpServletRequest req;
