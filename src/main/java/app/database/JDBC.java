@@ -62,7 +62,6 @@ public class JDBC {
             preparedStatement.setString(3, key);
             return preparedStatement;
         });
-        rootLogger.info("В базе данных обновлена сессия с ID: " + session.getId());
     }
 
     public void deleteConstantDB(String key) {
@@ -72,7 +71,6 @@ public class JDBC {
             preparedStatement.setString(1, key);
             return preparedStatement;
         });
-        rootLogger.info("В базе данных обновлена сессия с ID: " + session.getId());
     }
 
     public void updatePatchDB(Constant constant) {
@@ -83,7 +81,6 @@ public class JDBC {
             preparedStatement.setString(2, constant.getKey());
             return preparedStatement;
         });
-        rootLogger.info("В базе данных обновлена сессия с ID: " + session.getId());
     }
 
     public List<Constant> getConstantsDB() {

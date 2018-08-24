@@ -5,6 +5,7 @@ import app.math.Fibonacci;
 import app.math.LongArithmethic;
 import app.math.LongArithmeticImplList;
 import app.math.LongArithmeticMath;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import java.util.UUID;
 //TODO создать абстрактный класс, наследовать от него.
 public class Answer extends Page {
 
+    Logger logger = LogManager.getLogger(Answer.class);
     @Autowired
     JDBC jdbc;
     @Autowired
@@ -38,7 +40,7 @@ public class Answer extends Page {
         String b = (String) getParams().get("b");
         String operation = (String) getParams().get("operation");
         if (Integer.parseInt(a) > 50000 && "fib".equals(operation)) {
-            rootLogger.warn("Запущена операция фибоначчи с параметром: " + Integer.parseInt(a)+", пользователем с IP: "+req.getRemoteAddr());
+            logger.warn("Запущена операция фибоначчи с параметром: " + Integer.parseInt(a)+", пользователем с IP: "+req.getRemoteAddr());
         }
         String ans = calc(a, b, operation);
 

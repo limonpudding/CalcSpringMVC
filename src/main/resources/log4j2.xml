@@ -8,12 +8,12 @@
     </Appenders>
 
     <Loggers>
-        <Logger name= "app.pagesLogic.Answer" level="debug" additivity="true">
+        <Logger name= "app.pagesLogic.Answer" level="warn" additivity="true">
             <AppenderRef ref="Console"/>
         </Logger>
 
         <!-- Root Logger -->
-        <Root level="all">
+        <Root level="debug">
             <AppenderRef ref="Console"/>
         </Root>
     </Loggers>
