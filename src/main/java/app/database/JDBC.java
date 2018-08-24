@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +51,7 @@ public class JDBC {
         });
     }
 
+    @Transactional
     public void updateSessionEndTime() {
         final String UPDATE_SQL = "update SESSIONS set TIMEEND = ? where SESSIONS.ID = ?";
         jdbcTemplate.update(connection -> {
