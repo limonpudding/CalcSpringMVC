@@ -25,11 +25,4 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         resolver.setSuffix(".jsp");
         return resolver;
     }
-
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-
-        converters.add(new MappingJackson2HttpMessageConverter());
-        super.configureMessageConverters(converters);
-    }
 }
