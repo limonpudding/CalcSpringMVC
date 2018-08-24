@@ -2,6 +2,7 @@ package app.database;
 
 import app.pagesLogic.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -19,10 +20,17 @@ import java.util.List;
 @Repository
 public class JDBC {
 
-    @Autowired
-    DataSource dataSource;
-
+    private final HttpSession session;
+    private final DataSource dataSource;
+    private final HttpServletRequest req;
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public JDBC(DataSource dataSource, HttpSession session, HttpServletRequest req) {
+        this.dataSource = dataSource;
+        this.session = session;
+        this.req = req;
+    }
 
     @PostConstruct
     public void init() {
@@ -30,7 +38,7 @@ public class JDBC {
         jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    public void insertSessionTime(HttpServletRequest req) {
+    public void insertSessionTime() {
         final String INSERT_SQL = "insert into SESSIONS (ID, IP, TIMESTART, TIMEEND) values (?,?,?,?)";
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL);
@@ -42,17 +50,17 @@ public class JDBC {
         });
     }
 
-    public void updateSessionEndTime(HttpServletRequest req) {
-        final String UPDATE_SQL = "update SESSIONS set TIMEEND=? where SESSIONS.ID =?";
+    public void updateSessionEndTime() {
+        final String UPDATE_SQL = "update SESSIONS set TIMEEND = ? where SESSIONS.ID = ?";
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
-            preparedStatement.setTimestamp(1, new java.sql.Timestamp(req.getSession().getLastAccessedTime()));
-            preparedStatement.setString(2, req.getSession().getId());
+            preparedStatement.setTimestamp(1, new java.sql.Timestamp(session.getLastAccessedTime()));
+            preparedStatement.setString(2, session.getId());
             return preparedStatement;
         });
     }
 
-    public void putDataInBD(Operation operation, HttpSession session) {
+    public void putDataInBD(Operation operation) {
         String OPER_SQL = "insert into " + operation.getOperation() + " (ID, FIRSTOPERAND, SECONDOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?,?)";
         String FIB_SQL = "insert into " + operation.getOperation() + " (ID, FIRSTOPERAND, ANSWER, IDSESSION, TIME) values (?,?,?,?,?)";
         switch (operation.getOperation()) {
@@ -109,22 +117,21 @@ public class JDBC {
         }
 
 
-
-            final String SELECT_SQL = "" +
-                    "select * from (select distinct sessions.id, sessions.ip,sessions.timestart,sessions.timeend, 'false' as operation from SESSIONS left join history on SESSIONS.id = HISTORY.id where operation is null\n" +
-                    "union all\n" +
-                    "select distinct sessions.id, sessions.ip,sessions.timestart,sessions.timeend, 'true' as operation from SESSIONS left join history on SESSIONS.id = HISTORY.id where operation is not null) order by " + modeStr + " " + orderStr;
-            List<SessionsRow> dbRows = jdbcTemplate.query(SELECT_SQL,
-                    (rs, rowNum) -> {
-                        SessionsRow row = new SessionsRow();
-                        row.setId(rs.getString(1));
-                        row.setIp(rs.getString(2));
-                        row.setSessionStartTime(rs.getString(3));
-                        row.setSessionEndTime(rs.getString(4));
-                        row.setOperation(rs.getString(5));
-                        return row;
-                    });
-            return dbRows;
+        final String SELECT_SQL = "" +
+                "select * from (select distinct sessions.id, sessions.ip,sessions.timestart,sessions.timeend, 'false' as operation from SESSIONS left join history on SESSIONS.id = HISTORY.id where operation is null\n" +
+                "union all\n" +
+                "select distinct sessions.id, sessions.ip,sessions.timestart,sessions.timeend, 'true' as operation from SESSIONS left join history on SESSIONS.id = HISTORY.id where operation is not null) order by " + modeStr + " " + orderStr;
+        List<SessionsRow> dbRows = jdbcTemplate.query(SELECT_SQL,
+                (rs, rowNum) -> {
+                    SessionsRow row = new SessionsRow();
+                    row.setId(rs.getString(1));
+                    row.setIp(rs.getString(2));
+                    row.setSessionStartTime(rs.getString(3));
+                    row.setSessionEndTime(rs.getString(4));
+                    row.setOperation(rs.getString(5));
+                    return row;
+                });
+        return dbRows;
     }
 
     public List<DBRow> selectDataFromBD(String mode, String order, String id) {
@@ -157,15 +164,15 @@ public class JDBC {
                 modeStr = "TIME";
         }
 
-        final String SELECT_SQL = "SELECT OPERATION, FIRSTOPERAND, SECONDOPERAND, ANSWER, TIME FROM HISTORY where '"+id+"'=ID ORDER BY "+modeStr+" "+orderStr;
+        final String SELECT_SQL = "SELECT OPERATION, FIRSTOPERAND, SECONDOPERAND, ANSWER, TIME FROM HISTORY where '" + id + "'=ID ORDER BY " + modeStr + " " + orderStr;
         List<DBRow> dbRows = jdbcTemplate.query(SELECT_SQL,
                 (rs, rowNum) -> {
                     DBRow row = new DBRow();
-                    row.setOperationName(rs.getString(1));
-                    row.setOp1(rs.getString(2));
-                    row.setOp2(rs.getString(3));
-                    row.setAnswer(rs.getString(4));
-                    row.setTime(rs.getString(5));
+                    row.setOperationName(rs.getString("OPERATION"));
+                    row.setOp1(rs.getString("FIRSTOPERAND"));
+                    row.setOp2(rs.getString("SECONDOPERAND"));
+                    row.setAnswer(rs.getString("ANSWER"));
+                    row.setTime(rs.getString("TIME"));
                     return row;
                 });
         return dbRows;

@@ -40,7 +40,7 @@ public class Answer extends Page {
 
         Operation oper = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
 
-        jdbc.putDataInBD(oper, session);
+        jdbc.putDataInBD(oper);
 
         operationsHistory.addOperation(oper);
 

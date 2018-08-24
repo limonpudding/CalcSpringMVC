@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,32 +17,34 @@ import java.util.Map;
 @Controller
 public class MainController {
 
-    @Autowired
-    AnnotationConfigWebApplicationContext context;
-    @Autowired
-    HttpServletRequest req;
-    @Autowired
-    JDBC jdbc;
-    @Autowired
-    Page getAbout;
-    @Autowired
-    Page getHome;
-    @Autowired
-    Page getTables;
-    @Autowired
-    Page getAnswer;
-    @Autowired
-    Page getError;
-    @Autowired
-    Page getCalc;
-    @Autowired
-    Page getOpHistory;
+    private final HttpServletRequest req;
+    private final JDBC jdbc;
+    private final Page getAbout;
+    private final Page getHome;
+    private final Page getTables;
+    private final Page getAnswer;
+    private final Page getError;
+    private final Page getCalc;
+    private final Page getOpHistory;
 
-    private void init(){
+    @Autowired
+    public MainController(HttpServletRequest req, JDBC jdbc, Page getAbout, Page getHome, Page getTables, Page getAnswer, Page getError, Page getCalc, Page getOpHistory) {
+        this.req = req;
+        this.jdbc = jdbc;
+        this.getAbout = getAbout;
+        this.getHome = getHome;
+        this.getTables = getTables;
+        this.getAnswer = getAnswer;
+        this.getError = getError;
+        this.getCalc = getCalc;
+        this.getOpHistory = getOpHistory;
+    }
+
+    private void init() {
         if (req.getSession().isNew()) {
-            jdbc.insertSessionTime(req);
+            jdbc.insertSessionTime();
         } else {
-            jdbc.updateSessionEndTime(req);
+            jdbc.updateSessionEndTime();
         }
     }
 
@@ -52,7 +53,7 @@ public class MainController {
     @RequestMapping(path = "/")
     public ModelAndView getHome() throws Exception {
         init();
-        System.out.println(jdbc.toString()+" вот оно");
+        System.out.println(jdbc.toString() + " вот оно");
         return getHome.build();
     }
 
