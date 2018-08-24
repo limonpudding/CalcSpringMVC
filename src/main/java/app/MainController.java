@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Controller
+@RestController
 public class MainController {
 
     private final HttpServletRequest req;
@@ -119,15 +120,15 @@ public class MainController {
         return getError.build();
     }
 
-    @RequestMapping(path = "/rest/", method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity<Operation> getJSON(@RequestBody RESTParams restOperands) throws Exception {
+    @RequestMapping(path="/rest",method = RequestMethod.POST, headers = "Accept=application/json", produces = "application/json")
+    public @ResponseBody ResponseEntity<Operation> getJSON(@RequestBody RESTParams restOperands) throws Exception {
         init();
         String a = restOperands.getA();
         String b = restOperands.getB();
         String operation = restOperands.getOperation();
         String ans = Answer.calc(a, b, operation);
         Operation operationObject = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
-        return new ResponseEntity<Operation>(operationObject, HttpStatus.OK);
+        jdbc.putDataInBD(operationObject);
+        return new ResponseEntity<>(operationObject, HttpStatus.OK);
     }
 }

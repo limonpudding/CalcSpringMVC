@@ -28,5 +28,6 @@ public class ServiceListener implements ServletRequestListener {
     @Override
     public void requestInitialized(ServletRequestEvent sre) {
 
+        System.out.println("Я сервайс");
     }
 }

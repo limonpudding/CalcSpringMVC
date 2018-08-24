@@ -21,18 +21,13 @@ import java.util.List;
 @Repository
 public class JDBC {
 
-    private final HttpSession session;
-    private final DataSource dataSource;
-    private final HttpServletRequest req;
+    @Autowired private HttpSession session;
+    @Autowired private DataSource dataSource;
+    @Autowired private HttpServletRequest req;
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public JDBC(DataSource dataSource, HttpSession session, HttpServletRequest req) {
-        this.dataSource = dataSource;
-        this.session = session;
-        this.req = req;
-    }
 
+    JDBC() {}
     @PostConstruct
     public void init() {
         System.out.println("JDBCExample postConstruct is called. datasource = " + dataSource);
