@@ -13,6 +13,8 @@ public class UpdatePost {
         return value;
     }
 
+    public UpdatePost(){}
+
     public UpdatePost(String keyOld, String keyNew, String value) {
         this.keyOld = keyOld;
         this.keyNew = keyNew;

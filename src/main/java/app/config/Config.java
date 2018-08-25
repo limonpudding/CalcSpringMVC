@@ -54,6 +54,12 @@ public class Config extends WebMvcConfigurerAdapter {
             try (Connection connection = dataSource.getConnection()) {
                 Statement statement = connection.createStatement();
                 statement.execute("" +
+                        "create table CONSTANTS\n" +
+                        "(\n" +
+                        "  KEY            NVARCHAR2(40) default NULL not null\n" +
+                        "    primary key,\n" +
+                        "  VALUE  CLOB" +
+                        ");\n" +
                         "create table DIV\n" +
                         "(\n" +
                         "  ID            NVARCHAR2(40) default NULL not null\n" +
