@@ -1,4 +1,4 @@
-package app.pagesLogic;
+package app.pages.logic;
 
 import org.springframework.web.servlet.ModelAndView;
 

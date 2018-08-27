@@ -1,4 +1,4 @@
-package app.pagesLogic;
+package app.pages.logic;
 
 public class RESTParams {
     private String a;

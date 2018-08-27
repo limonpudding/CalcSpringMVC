@@ -1,13 +1,13 @@
-package app.pagesLogic;
+package app.pages.logic;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
-@Service("getOpHistory")
-public class OpHistory extends Page {
+@Service("getHome")
+public class Home extends Page {
     @Override
     public ModelAndView build() {
-        ModelAndView mav = new ModelAndView("ophistory");
+        ModelAndView mav = new ModelAndView("home");
         return mav;
     }
 }

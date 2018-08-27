@@ -1,13 +1,13 @@
-package app.pagesLogic;
+package app.pages.logic;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
-@Service("getAbout")
-public class About extends Page {
+@Service("getCalc")
+public class Calc extends Page {
     @Override
     public ModelAndView build() {
-        ModelAndView mav = new ModelAndView("about");
+        ModelAndView mav = new ModelAndView("input");
         return mav;
     }
 }

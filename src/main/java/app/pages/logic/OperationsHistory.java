@@ -1,4 +1,4 @@
-package app.pagesLogic;
+package app.pages.logic;
 
 import javax.servlet.http.HttpSession;
 import java.util.Collection;

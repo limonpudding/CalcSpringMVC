@@ -1,26 +1,19 @@
-package app.pagesLogic;
+package app.pages.logic;
 
 import app.database.JDBC;
 import app.math.Fibonacci;
 import app.math.LongArithmethic;
 import app.math.LongArithmeticImplList;
 import app.math.LongArithmeticMath;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.UUID;
 
@@ -67,7 +60,7 @@ public class Answer extends Page {
         a.setValue(strA);
         b.setValue(strB);
         if (Integer.parseInt(strA) > 50000 && "fib".equals(operation)) {
-            if (logger.getLevel().compareTo(Level.WARN)>=0) {
+            if (logger.isWarnEnabled()) {
                 logger.warn("Запущена операция фибоначчи с параметром: " + Integer.parseInt(strA));
             }
         }
