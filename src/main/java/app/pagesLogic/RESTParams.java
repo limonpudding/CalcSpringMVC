@@ -5,6 +5,7 @@ public class RESTParams {
     private String b;
     private String operation;
 
+
     RESTParams(){}
 
     public String getA() {

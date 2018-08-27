@@ -8,7 +8,10 @@
     </Appenders>
 
     <Loggers>
-        <Logger name= "app.pagesLogic.Answer" level="warn" additivity="true">
+        <Logger name= "Answer log" class = "app.pagesLogic.Answer" level="debug" additivity="true">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name= "REST log" class = "app.JsonController" level="debug" additivity="true">
             <AppenderRef ref="Console"/>
         </Logger>
 

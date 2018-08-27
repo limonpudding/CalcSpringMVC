@@ -27,7 +27,7 @@ import java.util.UUID;
 //TODO создать абстрактный класс, наследовать от него.
 public class Answer extends Page {
 
-    Logger logger = LogManager.getLogger(Answer.class);
+    private static Logger logger = LogManager.getLogger(Answer.class);
     @Autowired
     JDBC jdbc;
     @Autowired
@@ -39,9 +39,7 @@ public class Answer extends Page {
         String a = (String) getParams().get("a");
         String b = (String) getParams().get("b");
         String operation = (String) getParams().get("operation");
-        if (Integer.parseInt(a) > 50000 && "fib".equals(operation)) {
-            logger.warn("Запущена операция фибоначчи с параметром: " + Integer.parseInt(a)+", пользователем с IP: "+req.getRemoteAddr());
-        }
+
         String ans = calc(a, b, operation);
 
         OperationsHistory operationsHistory = new OperationsHistory();
@@ -68,6 +66,9 @@ public class Answer extends Page {
         LongArithmethic b = new LongArithmeticImplList();
         a.setValue(strA);
         b.setValue(strB);
+        if (Integer.parseInt(strA) > 50000 && "fib".equals(operation)) {
+            logger.warn("Запущена операция фибоначчи с параметром: " + Integer.parseInt(strA));
+        }
         switch (operation) {
             case "sum":
                 res = LongArithmeticMath.sum(a, b);

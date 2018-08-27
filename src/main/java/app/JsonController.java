@@ -3,30 +3,27 @@ package app;
 import app.database.JDBC;
 import app.pagesLogic.Answer;
 import app.pagesLogic.Operation;
-import app.pagesLogic.Page;
-import app.pagesLogic.RESTParams;
 import app.rest.Constant;
 import app.rest.Key;
 import app.rest.UpdatePost;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Matcher;
 
 @RestController
 public class JsonController {
     private final HttpServletRequest req;
     private final JDBC jdbc;
     private final Logger rootLogger;
-
+    private Logger logger = LogManager.getLogger(JsonController.class);
+    private final String regex = "^[-+]?[0-9]+$";
     @Autowired
     public JsonController(HttpServletRequest req, JDBC jdbc, Logger rootLogger) {
         this.req = req;
@@ -40,7 +37,7 @@ public class JsonController {
             @RequestParam(value = "a") String a,
             @RequestParam(value = "b") String b,
             @RequestParam(value = "operation") String operation) throws Exception {
-        String regex = "^[-+]?[0-9]+$";
+
         if (!a.matches(regex)) {
             a = jdbc.getConstantValueDB(a);
         }
@@ -50,45 +47,60 @@ public class JsonController {
         String ans = Answer.calc(a, b, operation);
         Operation operationObject = new Operation(new Date(), a, b, operation, ans, UUID.randomUUID().toString());
         jdbc.putDataInBD(operationObject);
+        logger.info("Поьзователь с IP: "+req.getRemoteAddr()+" начал выполнение операции \'"+operation+"\'");
         return new ResponseEntity<>(operationObject, HttpStatus.OK);
     }
 
-    @RequestMapping(path = "/rest/post", method = RequestMethod.POST)
-    public @ResponseBody
-    ResponseEntity updateConst(@RequestBody UpdatePost post) throws Exception {
+    @RequestMapping(path = "/rest", method = RequestMethod.POST)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateConst(@RequestBody UpdatePost post) {
         String keyOld = post.getKeyOld();
         String keyNew = post.getKeyNew();
         String value = post.getValue();
         Constant constant = new Constant(keyNew, value);
+        if (keyNew.matches(regex))
+            logger.warn("Попытка переименовать константу в вид, содержащий только число. Её использование будет не возможно, до изменения");
+        if (!value.matches(regex))
+            logger.warn("Попытка присвоить значение константы, не представляющее собой число");
+
         jdbc.updatePostDB(keyOld, constant);
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+        logger.info("Поьзователь с IP: "+req.getRemoteAddr()+" обновил константу \'"+keyOld+"\' на key:\'"+keyNew+"\', value:\'"+value+"\'");
     }
 
-    @RequestMapping(path = "/rest/put", method = RequestMethod.PUT)
+    @RequestMapping(path = "/rest", method = RequestMethod.PUT)
     public @ResponseBody
-    ResponseEntity putConst(@RequestBody Constant constant) throws Exception {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void putConst(@RequestBody Constant constant) {
+        if (constant.getKey().matches(regex))
+            logger.warn("Попытка добавить константу, состоящую только из числа. Её использование будет не возможно, до изменения");
+        if (!constant.getValue().matches(regex))
+            logger.warn("Попытка присвоить значение константы, не представляющее собой число");
         jdbc.putConstInDB(constant);
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+        logger.info("Поьзователь с IP: "+req.getRemoteAddr()+" добавил константу key:\'"+constant.getKey()+"\', value:\'"+constant.getValue()+"\'");
     }
 
-    @RequestMapping(path = "/rest/patch", method = RequestMethod.PATCH)
+    @RequestMapping(path = "/rest", method = RequestMethod.PATCH)
     public @ResponseBody
-    ResponseEntity updateValue(@RequestBody Constant constant) throws Exception {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void updateValue(@RequestBody Constant constant) {
         jdbc.updatePatchDB(constant);
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+        logger.info("Поьзователь с IP: "+req.getRemoteAddr()+" обновил значение константы \'"+constant.getKey()+"\' на value:\'"+constant.getValue()+"\'");
     }
 
-    @RequestMapping(path = "/rest/delete", method = RequestMethod.DELETE)
+    @RequestMapping(path = "/rest", method = RequestMethod.DELETE)
     public @ResponseBody
-    ResponseEntity deleteConst(@RequestBody Key key) throws Exception {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteConst(@RequestBody Key key) {
         jdbc.deleteConstantDB(key.getKey());
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+        logger.info("Поьзователь с IP: "+req.getRemoteAddr()+" удалил константу \'"+key+"\'");
     }
 
-    @RequestMapping(path = "/rest/get", method = RequestMethod.GET)
+    @RequestMapping(path = "/rest", method = RequestMethod.GET)
     public @ResponseBody
-    ResponseEntity<List<Constant>> getConstants() throws Exception {
+    ResponseEntity<List<Constant>> getConstants() {
         List<Constant> constants = jdbc.getConstantsDB();
+        logger.info("Поьзователь с IP: "+req.getRemoteAddr()+" запросил список констат");
         return new ResponseEntity<>(constants, HttpStatus.OK);
     }
 }
