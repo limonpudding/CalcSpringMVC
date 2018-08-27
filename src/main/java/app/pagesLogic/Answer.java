@@ -5,6 +5,7 @@ import app.math.Fibonacci;
 import app.math.LongArithmethic;
 import app.math.LongArithmeticImplList;
 import app.math.LongArithmeticMath;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -66,7 +67,9 @@ public class Answer extends Page {
         a.setValue(strA);
         b.setValue(strB);
         if (Integer.parseInt(strA) > 50000 && "fib".equals(operation)) {
-            logger.warn("Запущена операция фибоначчи с параметром: " + Integer.parseInt(strA));
+            if (logger.getLevel().compareTo(Level.WARN)>=0) {
+                logger.warn("Запущена операция фибоначчи с параметром: " + Integer.parseInt(strA));
+            }
         }
         switch (operation) {
             case "sum":

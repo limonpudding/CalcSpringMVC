@@ -5,6 +5,7 @@ import app.pagesLogic.Answer;
 import app.pagesLogic.Operation;
 import app.pagesLogic.Page;
 import app.pagesLogic.RESTParams;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,9 @@ public class MainController {
     private void init() {
         if (req.getSession().isNew()) {
             jdbc.insertSessionTime();
-            rootLogger.info("Подключился пользователь с IP: "+req.getRemoteAddr());
+            if (rootLogger.getLevel().compareTo(Level.INFO)>=0) {
+                rootLogger.info("Подключился пользователь с IP: " + req.getRemoteAddr());
+            }
         } else {
             jdbc.updateSessionEndTime();
         }
