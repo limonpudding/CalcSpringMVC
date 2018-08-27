@@ -22,7 +22,7 @@ public class JsonController {
     private final HttpServletRequest req;
     private final JDBC jdbc;
     private final Logger rootLogger;
-    private Logger logger = LogManager.getLogger(JsonController.class.getName());
+    private Logger logger = LogManager.getLogger(JsonController.class);
     private final String regex = "^[-+]?[0-9]+$";
     @Autowired
     public JsonController(HttpServletRequest req, JDBC jdbc, Logger rootLogger) {
