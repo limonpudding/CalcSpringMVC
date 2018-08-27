@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.UUID;
 
 @Service("getAnswer")
-//TODO создать абстрактный класс, наследовать от него.
 public class Answer extends Page {
 
     private static Logger logger = LogManager.getLogger(Answer.class);
