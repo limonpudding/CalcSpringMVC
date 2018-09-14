@@ -4,10 +4,4 @@
 
 1. [Подготовка web-контента Spring MVC](http://spring-projects.ru/guides/serving-web-content/)
 
-1. []()
-
-1. []()
-
-1. []()
-
-1. []()
+1. [Apache Log4j 2](https://logging.apache.org/log4j/2.x/)
